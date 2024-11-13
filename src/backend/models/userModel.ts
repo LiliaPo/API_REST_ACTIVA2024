@@ -1,6 +1,6 @@
 import pool from "../config/configDb.js";
 import { DeleteResult } from "../types/DeleteResult.js";
-import { User } from "../types/User.js";
+import { User } from "../types/user.js";
 
 
 export async function saveNewUser(user:User):Promise<any>{
