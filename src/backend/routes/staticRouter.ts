@@ -26,4 +26,3 @@ staticRouter.get('/login', (req: Express.Request, res: Express.Response) => {
 });
 
 export {staticRouter} ;
-

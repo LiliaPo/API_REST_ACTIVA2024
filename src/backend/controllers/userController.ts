@@ -1,84 +1,109 @@
-import { argon2Config } from "../config/configData.js";
-import { deleteUserById, findUserById, getUsers, saveNewUser, updateUserById } from "../models/userModel.js";
-import { ApiResult } from "../types/ApiResult.js";
-import { User } from "../types/user.js";
-import { ApiResultGenerator } from "../utils/ApiResultGenerator.js";
-import argon2 from 'argon2';
+import { Request, Response } from 'express';
+import * as userModel from '../models/userModel.js';
+import * as bcrypt from 'bcrypt';
+import { User } from '../types/user.js';
 
+const SALT_ROUNDS = 10;
 
-export async function newUser(user: User):Promise<ApiResult>{
-    let apiResult: ApiResult; 
-    user.password = await argon2.hash(user.password, argon2Config);   
-    try{
-        const result = await saveNewUser(user);
-        apiResult =  ApiResultGenerator.postResult(result);
-    }  catch (error) {
-        if (error instanceof Error) {
-            apiResult =  ApiResultGenerator.postResult(error);
-        } else {
-            apiResult =  ApiResultGenerator.postResult(new Error('Error desconocido'));
-        }
+export async function createUser(req: Request, res: Response) {
+    try {
+        // Encriptar la contraseña antes de guardarla
+        const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
+        
+        const newUser = {
+            ...req.body,
+            password: hashedPassword
+        };
+
+        const savedUser = await userModel.saveNewUser(newUser);
+        res.status(201).json(savedUser);
+    } catch (error) {
+        console.error('Error al crear usuario:', error);
+        res.status(500).json({ error: 'Error al crear usuario' });
     }
-    return apiResult;
 }
 
-export async function getAllUsers():Promise<ApiResult>{
+export async function loginUser(req: Request, res: Response) {
+    try {
+        const { email, password } = req.body;
+        const user = await userModel.findUserByEmail(email);
 
-    let apiResult: ApiResult;    
-    try{
-        const result = await getUsers();
-        apiResult =  ApiResultGenerator.getResult(result);
-    }  catch (error) {
-        if (error instanceof Error) {
-            apiResult =  ApiResultGenerator.getResult(error);
-        } else {
-            apiResult =  ApiResultGenerator.getResult(new Error('Error desconocido'));
+        if (!user) {
+            return res.status(401).json({ error: 'Usuario no encontrado' });
         }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
+        }
+
+        const { password: _, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ error: 'Error en el proceso de login' });
     }
-    return apiResult;
 }
 
-export async function getUser(id:string):Promise<ApiResult>{
-    let apiResult: ApiResult;    
-    try{
-        const result = await findUserById(id);
-        apiResult =  ApiResultGenerator.getResult(result);
-    }  catch (error) {
-        if (error instanceof Error) {
-            apiResult =  ApiResultGenerator.getResult(error);
-        } else {
-            apiResult =  ApiResultGenerator.getResult(new Error('Error desconocido'));
-        }
+export async function getUsers(req: Request, res: Response) {
+    try {
+        const users = await userModel.getUsers();
+        const usersWithoutPasswords = users.map((user: User) => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+        res.json(usersWithoutPasswords);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ error: 'Error al obtener usuarios' });
     }
-    return apiResult;
 }
 
-export async function deleteUser(id:string):Promise<ApiResult>{
-    let apiResult: ApiResult;    
-    try{
-        const result = await deleteUserById(id);
-        apiResult =  ApiResultGenerator.deleteResult(result);
-    }  catch (error) {
-        if (error instanceof Error) {
-            apiResult =  ApiResultGenerator.deleteResult(error);
+export async function getUserById(req: Request, res: Response) {
+    try {
+        const user = await userModel.findUserById(req.params.id);
+        if (user) {
+            const { password, ...userWithoutPassword } = user;
+            res.json(userWithoutPassword);
         } else {
-            apiResult =  ApiResultGenerator.deleteResult(new Error('Error desconocido'));
+            res.status(404).json({ error: 'Usuario no encontrado' });
         }
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        res.status(500).json({ error: 'Error al obtener usuario' });
     }
-    return apiResult;
 }
 
-export async function updateUser(user:User):Promise<ApiResult>{
-    let apiResult: ApiResult;    
-    try{
-        const result = await updateUserById(user);
-        apiResult =  ApiResultGenerator.putResult(result);
-    }  catch (error) {
-        if (error instanceof Error) {
-            apiResult =  ApiResultGenerator.putResult(error);
-        } else {
-            apiResult =  ApiResultGenerator.putResult(new Error('Error desconocido'));
-        }
+export async function deleteUser(req: Request, res: Response) {
+    try {
+        const result = await userModel.deleteUserById(req.params.id);
+        res.json(result);
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({ error: 'Error al eliminar usuario' });
     }
-    return apiResult;
+}
+
+export async function updateUser(req: Request, res: Response) {
+    try {
+        const userId = req.params.id;
+        const userData = req.body;
+
+        if (userData.password) {
+            userData.password = await bcrypt.hash(userData.password, SALT_ROUNDS);
+        }
+
+        const updatedUser = await userModel.updateUserById(userId, userData);
+        
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        const { password: _, ...userWithoutPassword } = updatedUser;
+        res.json(userWithoutPassword);
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
 }
