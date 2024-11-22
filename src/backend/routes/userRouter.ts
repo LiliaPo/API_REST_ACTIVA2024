@@ -1,33 +1,28 @@
-import Express from 'express';
-import { User } from '../types/user.js';
-import { deleteUser, getAllUsers, getUser, newUser } from '../controllers/userController.js';
+import express from 'express';
 import { validateNumericParams } from '../middlewares/validateNumericParams.js';
+import { createUser, getUsers, getUserById, deleteUser } from '../controllers/userController.js';
 import { DeleteResult } from '../types/DeleteResult.js';
 
-const userRouter = Express.Router();
+const userRouter = express.Router();
 
-userRouter.get("/", async (req: Express.Request, res: Express.Response) => {
-    const result = await getAllUsers();
-    res.json(result);
-  });
-  
-userRouter.get("/:id", validateNumericParams, async (req: Express.Request, res: Express.Response) => {
-    const result = await getUser(req.params.id);
-    res.send(result);
-  });
- 
-userRouter.post("/", async (req: Express.Request, res: Express.Response) => {
-    const user: User = {userName: req.body.username, name: req.body.name, first_surname: req.body.surname, email: req.body.email, password: req.body.password};
-    const result = await newUser(user);
-    res.send(result);
+// GET /api/users - Obtener todos los usuarios
+userRouter.get('/', async (req, res) => {
+    await getUsers(req, res);
 });
 
-userRouter.delete("/:id", validateNumericParams, async (req: Express.Request, res: Express.Response) => {  
-    const result: DeleteResult = await deleteUser(req.params.id);
-    let statusCode=200;
-    if(!result.success && result.rowsAffected==0) statusCode=404;
-    if(!result.success && !("rowsAffected" in result)) statusCode=500;
-    res.status(statusCode).json({message: result.message});
+// GET /api/users/:id - Obtener un usuario por ID
+userRouter.get('/:id', validateNumericParams, async (req, res) => {
+    await getUserById(req, res);
+});
+
+// POST /api/users - Crear un nuevo usuario
+userRouter.post('/', async (req, res) => {
+    await createUser(req, res);
+});
+
+// DELETE /api/users/:id - Eliminar un usuario
+userRouter.delete('/:id', validateNumericParams, async (req, res) => {
+    await deleteUser(req, res);
 });
 
 export default userRouter;

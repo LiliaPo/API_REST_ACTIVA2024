@@ -4,11 +4,10 @@
   "description": "creacion de mi primera API Rest con ExpressJS y Typescript. Será un CRUD sobre una BD PosgreSQL",
   "main": "index.js",
   "scripts": {
-    "build:backend": "tsc",
-    "build:frontend": "tsc -p src/frontend/tsconfig-front.json",
-    "build": "npm run build:backend && npm run build:frontend",
-    "start": "npm run build && node --experimental-specifier-resolution=node build/index.js",
-    "dev": "npx nodemon --exec npx ts-node --esm src/index.ts",
+    "build": "tsc",
+    "build:frontend": "tsc -p tsconfig.json && cp -r build/frontend/js public/js",
+    "start": "npm run build && nodemon build/index.js",
+    "dev": "tsc -w & nodemon build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -23,17 +22,17 @@
   "author": "Jano Soler",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "pg": "^8.13.0"
+    "pg": "^8.13.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.5",
     "@types/pg": "^8.11.10",
     "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "type": "module"

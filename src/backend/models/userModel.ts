@@ -45,4 +45,10 @@ export async function deleteUserById(id: string): Promise<DeleteResult> {
             message: `Error al eliminar usuario: ${(error as Error).message}`
         };
     }
+}
+
+export async function findUserByEmail(email: string): Promise<any> {
+    const queryString = 'SELECT * FROM "user" WHERE "email" = $1';
+    const result = await pool.query(queryString, [email]);
+    return result.rows[0];
 }   

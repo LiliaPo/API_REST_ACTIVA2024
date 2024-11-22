@@ -1,18 +1,15 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import apiRouter from './routes/apiRouter.js';
 import { staticRouter } from './routes/staticRouter.js';
-import pool from './config/configDb.js';
+import { initDatabase } from './config/configDb.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000');
 
-// Middleware para parsear JSON
 app.use(express.json());
-
-// Test de conexión a la BD
-pool.connect()
-    .then(() => console.log('Conexión a PostgreSQL establecida'))
-    .catch(err => console.error('Error conectando a PostgreSQL:', err));
+app.use(express.static(path.join(__dirname, '../..', 'public')));
 
 // Middleware para logging
 app.use((req, res, next) => {
@@ -20,7 +17,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Rutas
 app.use('/api', apiRouter);
 app.use('/', staticRouter);
 
@@ -30,6 +26,22 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
     res.status(500).json({ error: 'Algo salió mal!' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+// Intentar diferentes puertos si el 3000 está ocupado
+const startServer = async (port: number) => {
+    try {
+        await initDatabase();
+        app.listen(port, () => {
+            console.log(`Servidor corriendo en http://localhost:${port}`);
+        });
+    } catch (err) {
+        if ((err as any).code === 'EADDRINUSE') {
+            console.log(`Puerto ${port} en uso, intentando puerto ${port + 1}`);
+            startServer(port + 1);
+        } else {
+            console.error('Error al iniciar el servidor:', err);
+            process.exit(1);
+        }
+    }
+};
+
+startServer(PORT);
