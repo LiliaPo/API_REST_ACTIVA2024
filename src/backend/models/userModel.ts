@@ -10,12 +10,17 @@ export async function saveNewUser(user: User): Promise<User> {
     return result.rows[0];
 }
 
+<<<<<<< HEAD
 export async function getUsers(): Promise<User[]> {  
+=======
+export async function getUsers():Promise<QueryResult>{  
+>>>>>>> 833a733fe9c41727499a6297c95eaa5bca4bfcd2
     const queryString = `SELECT * FROM "user"`;
     const result = await pool.query(queryString);
     return result.rows;
 }
 
+<<<<<<< HEAD
 export async function findUserById(id: string): Promise<User | null> {
     const queryString = `SELECT * FROM "user" WHERE "id" = $1`;
     const result = await pool.query(queryString, [id]);
@@ -47,6 +52,26 @@ export async function deleteUserById(id: string): Promise<DeleteResult> {
         };
     }
 }
+=======
+export async function findUserById(id:string):Promise<QueryResult>{ 
+    const queryString = `SELECT * FROM "user" WHERE "id" = ${id}`;
+    const result = await pool.query(queryString);
+    return result;
+}
+
+export async function findUserByUsername(username:string):Promise<QueryResult>{ 
+    const queryString = `SELECT * FROM "user" WHERE "userName" = '${username}'`;
+    const result = await pool.query(queryString);
+    return result;
+}
+
+export async function deleteUserById(id: string): Promise<QueryResult> {
+   
+        const queryString = `DELETE FROM "user" WHERE "id" = ${id}`;
+        const result = await pool.query(queryString);
+        return result;
+}   
+>>>>>>> 833a733fe9c41727499a6297c95eaa5bca4bfcd2
 
 export async function findUserByEmail(email: string): Promise<User | null> {
     const queryString = 'SELECT * FROM "user" WHERE "email" = $1';
