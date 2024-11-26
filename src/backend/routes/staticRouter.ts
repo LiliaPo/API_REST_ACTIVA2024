@@ -26,6 +26,10 @@ staticRouter.get('/login', (req: Express.Request, res: Express.Response) => {
     const targetFilePath = path.join(publicPath, "/login.html");
     res.sendFile(targetFilePath);
 });
+<<<<<<< HEAD
+=======
 
 export {staticRouter} ;
+>>>>>>> e0ccdbc6091f29f7fd8b7d102799bf75d3d2f88d
 
+export {staticRouter} ;

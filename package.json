@@ -1,44 +1,38 @@
 {
   "name": "primera-api-express",
   "version": "1.0.0",
-  "description": "creacion de mi primera API Rest con ExpressJS y Typescript. Será un CRUD sobre una BD PosgreSQL",
+  "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "build:backend": "tsc",
-    "build:frontend": "tsc -p src/frontend/tsconfig-front.json",
-    "build": "npm run build:backend && npm run build:frontend",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && nodemon build/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "tsc",
+    "build:frontend": "tsc -p tsconfig.frontend.json"
   },
-  "keywords": [
-    "API",
-    "Rest",
-    "CRUD",
-    "Typescript",
-    "Buenas",
-    "prácticas",
-    "PosgreSQL"
-  ],
-  "author": "Jano Soler",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.7",
+    "argon2": "^0.31.2",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "method-override": "^3.0.0",
-    "pg": "^8.13.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
-    "@types/argon2": "^0.14.1",
-    "@types/express": "^5.0.0",
-    "@types/express-session": "^1.18.0",
+    "@types/argon2": "^0.15.4",
+    "@types/bcrypt": "^5.0.2",
+    "@types/dotenv": "^8.2.3",
+    "@types/express": "^4.17.21",
     "@types/method-override": "^0.0.35",
-    "@types/node": "^22.7.5",
-    "@types/pg": "^8.11.10",
-    "argon2": "^0.41.1",
-    "nodemon": "^3.1.7",
-    "typescript": "^5.6.3"
-  },
-  "type": "module"
+    "@types/morgan": "^1.9.9",
+    "@types/pg": "^8.10.9",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
+  }
 }
